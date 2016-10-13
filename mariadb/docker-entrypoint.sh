@@ -1,5 +1,6 @@
 #!/bin/bash
 set -eo pipefail
+shopt -s nullglob
 
 # if command starts with an option, prepend mysqld
 if [ "${1:0:1}" = '-' ]; then
@@ -18,7 +19,7 @@ for arg; do
 done
 
 _datadir() {
-	"$@" --verbose --help --log-bin-index=`mktemp -u` 2>/dev/null | awk '$1 == "datadir" { print $2; exit }'
+	"$@" --verbose --help 2>/dev/null | awk '$1 == "datadir" { print $2; exit }'
 }
 
 # allow the container to be started with `--user`
@@ -43,7 +44,7 @@ if [ "$1" = 'mysqld' -a -z "$wantHelp" ]; then
 		mkdir -p "$DATADIR"
 
 		echo 'Initializing database'
-		mysql_install_db --datadir="$DATADIR" --rpm
+		"$@" --initialize-insecure
 		echo 'Database initialized'
 
 		"$@" --skip-networking &
@@ -89,7 +90,7 @@ if [ "$1" = 'mysqld' -a -z "$wantHelp" ]; then
 		fi
 
 		if [ "$MYSQL_DATABASE" ]; then
-			echo "CREATE DATABASE IF NOT EXISTS \`$MYSQL_DATABASE\` ;" | "${mysql[@]}"
+			echo "CREATE DATABASE IF NOT EXISTS \`$MYSQL_DATABASE\` CHARACTER SET utf8 COLLATE utf8_general_ci;" | "${mysql[@]}"
 			mysql+=( "$MYSQL_DATABASE" )
 		fi
 
@@ -114,6 +115,11 @@ if [ "$1" = 'mysqld' -a -z "$wantHelp" ]; then
 			echo
 		done
 
+		if [ ! -z "$MYSQL_ONETIME_PASSWORD" ]; then
+			"${mysql[@]}" <<-EOSQL
+				ALTER USER 'root'@'%' PASSWORD EXPIRE;
+			EOSQL
+		fi
 		if ! kill -s TERM "$pid" || ! wait "$pid"; then
 			echo >&2 'MySQL init process failed.'
 			exit 1
@@ -123,6 +129,7 @@ if [ "$1" = 'mysqld' -a -z "$wantHelp" ]; then
 		echo 'MySQL init process done. Ready for start up.'
 		echo
 	fi
+	chown -R mysql:mysql "$DATADIR"
 fi
 
 exec "$@"
