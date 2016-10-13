@@ -44,7 +44,7 @@ if [ "$1" = 'mysqld' -a -z "$wantHelp" ]; then
 		mkdir -p "$DATADIR"
 
 		echo 'Initializing database'
-		"$@" --initialize-insecure
+		mysql_install_db --datadir="$DATADIR" --rpm
 		echo 'Database initialized'
 
 		"$@" --skip-networking &
