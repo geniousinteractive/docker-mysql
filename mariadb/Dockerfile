@@ -82,9 +82,6 @@ RUN sed -Ei 's/^(bind-address|log)/#&/' /etc/mysql/my.cnf \
 
 VOLUME /var/lib/mysql
 
-echo innodb_buffer_pool_size=128M >> /etc/mysql/my.cnf
-echo innodb_log_file_size = 32M >> /etc/mysql/my.cnf
-
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN ln -s usr/local/bin/docker-entrypoint.sh / # backwards compat
 ENTRYPOINT ["docker-entrypoint.sh"]
