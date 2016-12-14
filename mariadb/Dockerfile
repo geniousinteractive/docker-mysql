@@ -44,6 +44,7 @@ RUN echo "deb https://repo.percona.com/apt jessie main" > /etc/apt/sources.list.
 ENV MARIADB_MAJOR 10.1
 ENV MARIADB_VERSION 10.1.18+maria-1~jessie
 
+RUN apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xcbcb082a1bb943db
 RUN echo "deb http://ftp.osuosl.org/pub/mariadb/repo/$MARIADB_MAJOR/debian jessie main" > /etc/apt/sources.list.d/mariadb.list \
 	&& { \
 		echo 'Package: *'; \
