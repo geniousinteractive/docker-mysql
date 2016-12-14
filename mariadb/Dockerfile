@@ -33,6 +33,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Percona MySQL Development Team <mysql-dev@percona.com>
 RUN apt-key adv --keyserver ha.pool.sks-keyservers.net --recv-keys 199369E5404BD5FC7D2FE43BCBCB082A1BB943DB \
 	&& apt-key adv --keyserver ha.pool.sks-keyservers.net --recv-keys 430BDF5C56E7C94E848EE60C1C4CBDCDCD2EFD2A
+RUN apt-key adv --keyserver keys.gnupg.net --recv-keys 8507EFA5 \
+	&& apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 8507EFA5
 
 RUN echo "deb https://repo.percona.com/apt jessie main" > /etc/apt/sources.list.d/percona.list \
 	&& { \
