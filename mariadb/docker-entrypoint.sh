@@ -22,6 +22,14 @@ _datadir() {
 	"$@" --verbose --help 2>/dev/null | awk '$1 == "datadir" { print $2; exit }'
 }
 
+# allow the container to be started with `--user`
+if [ "$1" = 'mysqld' -a -z "$wantHelp" -a "$(id -u)" = '0' ]; then
+	DATADIR="$(_datadir "$@")"
+	mkdir -p "$DATADIR"
+	chown -R mysql:mysql "$DATADIR"
+	exec gosu mysql "$BASH_SOURCE" "$@"
+fi
+
 if [ "$1" = 'mysqld' -a -z "$wantHelp" ]; then
 	# Get config
 	DATADIR="$(_datadir "$@")"
