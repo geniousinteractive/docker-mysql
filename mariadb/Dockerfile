@@ -11,7 +11,7 @@ RUN set -x \
 	&& wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture)" \
 	&& wget -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture).asc" \
 	&& export GNUPGHOME="$(mktemp -d)" \
-	&& gpg --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 \
+	&& gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 \
 	&& gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu \
 	&& rm -r "$GNUPGHOME" /usr/local/bin/gosu.asc \
 	&& chmod +x /usr/local/bin/gosu \
@@ -31,8 +31,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # MariaDB Package Signing Key <package-signing-key@mariadb.org>
 # Key fingerprint = 430B DF5C 56E7 C94E 848E  E60C 1C4C BDCD CD2E FD2A
 # Percona MySQL Development Team <mysql-dev@percona.com>
-RUN apt-key adv --keyserver keys.gnupg.net --recv-keys 8507EFA5 \
-	&& apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 8507EFA5
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 199369E5404BD5FC7D2FE43BCBCB082A1BB943DB \
+	&& apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 430BDF5C56E7C94E848EE60C1C4CBDCDCD2EFD2A
 
 RUN echo "deb https://repo.percona.com/apt jessie main" > /etc/apt/sources.list.d/percona.list \
 	&& { \
@@ -44,7 +44,6 @@ RUN echo "deb https://repo.percona.com/apt jessie main" > /etc/apt/sources.list.
 ENV MARIADB_MAJOR 10.1
 ENV MARIADB_VERSION 10.1.18+maria-1~jessie
 
-RUN apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xcbcb082a1bb943db
 RUN echo "deb http://ftp.osuosl.org/pub/mariadb/repo/$MARIADB_MAJOR/debian jessie main" > /etc/apt/sources.list.d/mariadb.list \
 	&& { \
 		echo 'Package: *'; \
@@ -84,6 +83,7 @@ RUN sed -Ei 's/^(bind-address|log)/#&/' /etc/mysql/my.cnf \
 RUN mkdir /docker-entrypoint-initdb.d
 COPY my.cnf /etc/mysql/my.cnf
 COPY docker-entrypoint.sh /usr/local/bin/
+
 WORKDIR /var/lib/mysql
 VOLUME /var/lib/mysql
 
